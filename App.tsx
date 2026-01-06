@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Save, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Save, LayoutDashboard, BarChart3, History as HistoryIcon } from 'lucide-react';
 import { getTodayString, fetchDailyLog, saveDailyLog } from './services/dataService';
 import { DailyLog } from './types';
 
@@ -9,12 +9,13 @@ import DietTracker from './components/DietTracker';
 import ExerciseTracker from './components/ExerciseTracker';
 import WeightWidget from './components/WeightWidget';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import HistoryView from './components/HistoryView';
 
 const App: React.FC = () => {
   const [date, setDate] = useState<string>(getTodayString());
   const [log, setLog] = useState<DailyLog | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'tracker' | 'analytics'>('tracker');
+  const [activeTab, setActiveTab] = useState<'tracker' | 'analytics' | 'history'>('tracker');
   const [refreshDataTrigger, setRefreshDataTrigger] = useState(0);
 
   // Load data when date changes
@@ -77,6 +78,12 @@ const App: React.FC = () => {
              >
                 Análises
              </button>
+             <button 
+                onClick={() => setActiveTab('history')}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'history' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+             >
+                Histórico
+             </button>
           </div>
 
           <div className="flex items-center gap-3">
@@ -109,7 +116,7 @@ const App: React.FC = () => {
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         
-        {activeTab === 'tracker' ? (
+        {activeTab === 'tracker' && (
              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Tracker Grid Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -130,15 +137,21 @@ const App: React.FC = () => {
                     </div>
                 </div>
             </div>
-        ) : (
+        )}
+
+        {activeTab === 'analytics' && (
             <AnalyticsDashboard refreshTrigger={refreshDataTrigger} />
+        )}
+
+        {activeTab === 'history' && (
+            <HistoryView refreshTrigger={refreshDataTrigger} />
         )}
 
       </main>
 
       {/* Mobile Tab Navigation (Fixed Bottom) */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-2 sm:hidden z-30">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
             <button 
                 onClick={() => setActiveTab('tracker')}
                 className={`flex flex-col items-center justify-center p-2 rounded-lg ${activeTab === 'tracker' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'}`}
@@ -152,6 +165,13 @@ const App: React.FC = () => {
             >
                 <BarChart3 size={20} />
                 <span className="text-xs font-medium mt-1">Análises</span>
+            </button>
+            <button 
+                onClick={() => setActiveTab('history')}
+                className={`flex flex-col items-center justify-center p-2 rounded-lg ${activeTab === 'history' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'}`}
+            >
+                <HistoryIcon size={20} />
+                <span className="text-xs font-medium mt-1">Histórico</span>
             </button>
         </div>
       </div>

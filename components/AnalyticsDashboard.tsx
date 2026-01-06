@@ -9,6 +9,7 @@ import { TrendingUp, Droplets, Utensils, Flame, Calendar } from 'lucide-react';
 
 const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) => {
   const [data, setData] = useState<DailyLog[]>([]);
+  const HEIGHT = 1.79; // Mesma altura usada no WeightWidget
 
   useEffect(() => {
     fetchAllHistory().then((logs) => {
@@ -35,9 +36,12 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
   // Format Data for Charts
   const chartData = last30Days.map(log => {
     const dietScore = Object.values(log.meals).filter(Boolean).length;
+    const imc = log.weight ? log.weight / (HEIGHT * HEIGHT) : null;
+    
     return {
         name: log.date.split('-').slice(1).reverse().join('/'),
         weight: log.weight,
+        imc: imc ? parseFloat(imc.toFixed(2)) : null,
         water: log.waterMl,
         calories: (log.runCalories || 0) + (log.gymCalories || 0),
         dietScore: dietScore
@@ -87,29 +91,57 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
         </div>
       </div>
 
-      {/* Main Combined Chart */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <h3 className="font-semibold text-slate-800 mb-6">Peso vs. Calorias</h3>
-        <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={chartData}>
-                    <defs>
-                        <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
-                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                        </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
-                    <YAxis yAxisId="left" orientation="left" domain={['dataMin - 2', 'dataMax + 2']} axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                    <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                    <Legend iconType="circle" />
-                    <Bar yAxisId="right" dataKey="calories" name="Calorias" fill="#f97316" radius={[4, 4, 0, 0]} barSize={20} fillOpacity={0.3} />
-                    <Area yAxisId="left" type="monotone" dataKey="weight" name="Peso (kg)" stroke="#6366f1" strokeWidth={3} fill="url(#colorWeight)" />
-                </ComposedChart>
-            </ResponsiveContainer>
+      {/* Grid for Split Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Weight & IMC Chart */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <h3 className="font-semibold text-slate-800 mb-6">Evolução de Peso e IMC</h3>
+            <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={chartData}>
+                        <defs>
+                            <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
+                        
+                        {/* Left Axis: Weight */}
+                        <YAxis yAxisId="left" orientation="left" domain={['dataMin - 2', 'dataMax + 2']} axisLine={false} tickLine={false} tick={{fill: '#6366f1', fontSize: 12}} />
+                        
+                        {/* Right Axis: IMC */}
+                        <YAxis yAxisId="right" orientation="right" domain={['dataMin - 0.5', 'dataMax + 0.5']} axisLine={false} tickLine={false} tick={{fill: '#8b5cf6', fontSize: 12}} />
+                        
+                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                        <Legend iconType="circle" />
+                        
+                        <Area yAxisId="left" type="monotone" dataKey="weight" name="Peso (kg)" stroke="#6366f1" strokeWidth={3} fill="url(#colorWeight)" />
+                        <Line yAxisId="right" type="monotone" dataKey="imc" name="IMC" stroke="#8b5cf6" strokeWidth={2} dot={{r: 3}} />
+                    </ComposedChart>
+                </ResponsiveContainer>
+            </div>
         </div>
+
+        {/* Calories Burned Chart */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <h3 className="font-semibold text-slate-800 mb-6">Calorias Queimadas (Exercícios)</h3>
+            <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                        <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                        <Legend iconType="circle" />
+                        <Bar dataKey="calories" name="Kcal Queimadas" fill="#f97316" radius={[4, 4, 0, 0]} barSize={30} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+        </div>
+
       </div>
 
       {/* Diet Consistency Chart */}
@@ -127,59 +159,6 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
             </ResponsiveContainer>
         </div>
       </div>
-
-      {/* Data Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-50">
-            <h3 className="font-semibold text-slate-800">Histórico Detalhado</h3>
-        </div>
-        <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-slate-600">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-50">
-                    <tr>
-                        <th className="px-6 py-4 font-medium">Data</th>
-                        <th className="px-6 py-4 font-medium">Peso</th>
-                        <th className="px-6 py-4 font-medium">Água</th>
-                        <th className="px-6 py-4 font-medium">Calorias</th>
-                        <th className="px-6 py-4 font-medium">Dieta</th>
-                        <th className="px-6 py-4 font-medium">Exercícios</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {/* Reverse to show newest first for table */}
-                    {[...data].reverse().map((row) => (
-                        <tr key={row.date} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                            <td className="px-6 py-4 font-medium text-slate-900">
-                                {row.date.split('-').reverse().join('/')}
-                            </td>
-                            <td className="px-6 py-4">
-                                {row.weight ? `${row.weight} kg` : '-'}
-                            </td>
-                            <td className="px-6 py-4">
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.waterMl >= 2500 ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
-                                    {row.waterMl} ml
-                                </span>
-                            </td>
-                            <td className="px-6 py-4">
-                                {(row.runCalories || 0) + (row.gymCalories || 0)} kcal
-                            </td>
-                            <td className="px-6 py-4">
-                                {Object.values(row.meals).filter(Boolean).length}/6
-                            </td>
-                            <td className="px-6 py-4">
-                                <div className="flex gap-2">
-                                    {row.didRun && <span className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-700">Corrida</span>}
-                                    {row.didGym && <span className="px-2 py-1 rounded text-xs bg-purple-100 text-purple-700">Academia</span>}
-                                    {!row.didRun && !row.didGym && <span className="text-slate-400">-</span>}
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-      </div>
-
     </div>
   );
 };
