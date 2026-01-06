@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Save, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Save, LayoutDashboard, BarChart3, Sparkles, X } from 'lucide-react';
 import { getTodayString, fetchDailyLog, saveDailyLog } from './services/dataService';
+import { generateHealthInsight } from './services/geminiService';
 import { DailyLog } from './types';
 
 // Components
@@ -16,6 +17,11 @@ const App: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'tracker' | 'analytics'>('tracker');
   const [refreshDataTrigger, setRefreshDataTrigger] = useState(0);
+
+  // AI Insight State
+  const [showInsight, setShowInsight] = useState(false);
+  const [insightText, setInsightText] = useState('');
+  const [loadingInsight, setLoadingInsight] = useState(false);
 
   // Load data when date changes
   useEffect(() => {
@@ -34,6 +40,21 @@ const App: React.FC = () => {
     await saveDailyLog(log);
     setIsSaving(false);
     setRefreshDataTrigger(prev => prev + 1);
+  };
+
+  // Handler for AI Insight
+  const handleGenerateInsight = async () => {
+    if (!log) return;
+    setLoadingInsight(true);
+    setShowInsight(true);
+    setInsightText('');
+    
+    // Save current state before generating insight to ensure AI gets latest data
+    await saveDailyLog(log);
+    
+    const text = await generateHealthInsight(log);
+    setInsightText(text);
+    setLoadingInsight(false);
   };
 
   // Handler for updating local state
@@ -95,10 +116,22 @@ const App: React.FC = () => {
                 </div>
               )}
 
+            {/* AI Coach Button (Mobile & Desktop) */}
+            {activeTab === 'tracker' && (
+                <button
+                    onClick={handleGenerateInsight}
+                    className="p-2 sm:px-4 sm:py-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                    title="Pedir feedback do Coach IA"
+                >
+                    <Sparkles size={18} />
+                    <span className="hidden sm:inline text-sm font-medium">Coach IA</span>
+                </button>
+            )}
+
             <button 
                 onClick={handleSave}
                 disabled={isSaving}
-                className={`flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 ${activeTab !== 'tracker' ? 'hidden' : ''}`}
+                className={`flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors disabled:opacity-50 ${activeTab !== 'tracker' ? 'hidden' : ''}`}
             >
                 <Save size={18} />
                 <span className="hidden sm:inline">{isSaving ? 'Salvando...' : 'Salvar'}</span>
@@ -135,6 +168,45 @@ const App: React.FC = () => {
         )}
 
       </main>
+
+      {/* AI Insight Modal */}
+      {showInsight && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-4 flex items-center justify-between text-white">
+                    <div className="flex items-center gap-2">
+                        <Sparkles size={20} />
+                        <h3 className="font-semibold">Coach HabitFlow</h3>
+                    </div>
+                    <button onClick={() => setShowInsight(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+                <div className="p-6">
+                    {loadingInsight ? (
+                        <div className="flex flex-col items-center justify-center py-8 gap-3">
+                            <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                            <p className="text-sm text-slate-500 animate-pulse">Analisando seu dia...</p>
+                        </div>
+                    ) : (
+                        <div className="prose prose-slate prose-sm">
+                            <p className="text-slate-700 text-lg leading-relaxed whitespace-pre-line">
+                                {insightText}
+                            </p>
+                        </div>
+                    )}
+                </div>
+                <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                    <button 
+                        onClick={() => setShowInsight(false)}
+                        className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                    >
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
 
       {/* Mobile Tab Navigation (Fixed Bottom) */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-2 sm:hidden z-30">

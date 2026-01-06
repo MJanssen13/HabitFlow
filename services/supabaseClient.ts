@@ -10,8 +10,9 @@ const getEnvVar = (key: string) => {
   return process.env[`REACT_APP_${key}`] || process.env[key];
 };
 
-const SUPABASE_URL = getEnvVar('SUPABASE_URL');
-const SUPABASE_ANON_KEY = getEnvVar('SUPABASE_KEY');
+// Usa as variáveis de ambiente se existirem, caso contrário usa as chaves fornecidas
+const SUPABASE_URL = getEnvVar('SUPABASE_URL') || 'https://pgprqefdlqruigattqvi.supabase.co';
+const SUPABASE_ANON_KEY = getEnvVar('SUPABASE_KEY') || 'sb_publishable_jJ3Qe3b99uDP0hiEL5CQDQ_hjHiFZXl';
 
 // Só cria o cliente se as chaves existirem
 export const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY) 
