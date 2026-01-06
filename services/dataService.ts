@@ -99,6 +99,32 @@ export const saveDailyLog = async (log: DailyLog): Promise<void> => {
   }
 };
 
+export const clearDailyLog = async (date: string): Promise<void> => {
+    // 1. Remove do LocalStorage
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+        const allLogs: Record<string, DailyLog> = JSON.parse(stored);
+        if (allLogs[date]) {
+            delete allLogs[date];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(allLogs));
+        }
+    }
+
+    // 2. Remove do Supabase se configurado
+    if (isSupabaseConfigured && supabase) {
+        try {
+            const { error } = await supabase
+                .from('daily_logs')
+                .delete()
+                .eq('date', date);
+            
+            if (error) throw error;
+        } catch (err) {
+            console.error("Erro ao limpar dados no Supabase:", err);
+        }
+    }
+};
+
 export const fetchAllHistory = async (): Promise<DailyLog[]> => {
     let logs: DailyLog[] = [];
 

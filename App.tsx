@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Save, LayoutDashboard, BarChart3, History as HistoryIcon } from 'lucide-react';
-import { getTodayString, fetchDailyLog, saveDailyLog } from './services/dataService';
+import { ChevronLeft, ChevronRight, Save, LayoutDashboard, BarChart3, History as HistoryIcon, Trash2 } from 'lucide-react';
+import { getTodayString, fetchDailyLog, saveDailyLog, clearDailyLog, getEmptyLog } from './services/dataService';
 import { DailyLog } from './types';
 
 // Components
@@ -33,6 +33,19 @@ const App: React.FC = () => {
     if (!log) return;
     setIsSaving(true);
     await saveDailyLog(log);
+    setIsSaving(false);
+    setRefreshDataTrigger(prev => prev + 1);
+  };
+
+  // Handler for clearing
+  const handleClear = async () => {
+    if (!window.confirm('Tem certeza que deseja limpar todos os registros deste dia? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+    
+    setIsSaving(true); // Usa o estado de saving para loading visual
+    await clearDailyLog(date);
+    setLog(getEmptyLog(date)); // Reseta a UI imediatamente
     setIsSaving(false);
     setRefreshDataTrigger(prev => prev + 1);
   };
@@ -102,14 +115,27 @@ const App: React.FC = () => {
                 </div>
               )}
 
-            <button 
-                onClick={handleSave}
-                disabled={isSaving}
-                className={`flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors disabled:opacity-50 ${activeTab !== 'tracker' ? 'hidden' : ''}`}
-            >
-                <Save size={18} />
-                <span className="hidden sm:inline">{isSaving ? 'Salvando...' : 'Salvar'}</span>
-            </button>
+            {activeTab === 'tracker' && (
+                <>
+                    <button 
+                        onClick={handleClear}
+                        disabled={isSaving}
+                        title="Limpar dados do dia"
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                    
+                    <button 
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors disabled:opacity-50"
+                    >
+                        <Save size={18} />
+                        <span className="hidden sm:inline">{isSaving ? 'Salvando...' : 'Salvar'}</span>
+                    </button>
+                </>
+            )}
           </div>
         </div>
       </header>
