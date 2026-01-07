@@ -8,6 +8,7 @@ import WaterTracker from './components/WaterTracker';
 import DietTracker from './components/DietTracker';
 import ExerciseTracker from './components/ExerciseTracker';
 import WeightWidget from './components/WeightWidget';
+import SleepTracker from './components/SleepTracker';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import HistoryView from './components/HistoryView';
 
@@ -146,19 +147,26 @@ const App: React.FC = () => {
              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Tracker Grid Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Row 1 */}
-                    <div className="md:col-span-1">
+                    {/* Coluna 1: Dados Vitais */}
+                    <div className="flex flex-col gap-6 md:col-span-1">
                         <WeightWidget data={log} onChange={updateLog} />
+                        <SleepTracker data={log} onChange={updateLog} />
                     </div>
-                    <div className="md:col-span-1 lg:col-span-2">
+
+                    {/* Coluna 2: Água e Exercícios */}
+                    <div className="md:col-span-1">
                         <WaterTracker data={log} onChange={updateLog} />
                     </div>
-                    
-                    {/* Row 2 */}
-                    <div className="md:col-span-1 lg:col-span-2 h-full">
+                    <div className="md:hidden lg:block lg:col-span-1">
+                        <ExerciseTracker data={log} onChange={updateLog} />
+                    </div>
+
+                    {/* Coluna 3 (Wide): Dieta e Exercícios Mobile */}
+                    <div className="md:col-span-2 lg:col-span-2 h-full">
                         <DietTracker data={log} onChange={updateLog} />
                     </div>
-                    <div className="md:col-span-1">
+                    {/* Exercício aparece aqui em telas médias (MD) para balancear o grid */}
+                    <div className="md:col-span-2 lg:hidden">
                         <ExerciseTracker data={log} onChange={updateLog} />
                     </div>
                 </div>

@@ -12,6 +12,7 @@ export interface MealLog {
 export interface DailyLog {
   date: string; // ISO YYYY-MM-DD
   weight: number | null;
+  sleepHours: number | null; // Novo campo
   waterMl: number;
   didRun: boolean;
   runCalories: number;

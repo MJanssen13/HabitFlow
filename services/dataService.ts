@@ -11,6 +11,7 @@ export const getTodayString = (): string => {
 export const getEmptyLog = (date: string): DailyLog => ({
   date,
   weight: null,
+  sleepHours: null,
   waterMl: 0,
   didRun: false,
   runCalories: 0,
@@ -60,6 +61,7 @@ export const fetchDailyLog = async (date: string): Promise<DailyLog> => {
         return {
           date: data.date,
           weight: data.weight,
+          sleepHours: data.sleep_hours, // Mapeamento do banco
           waterMl: data.water_ml,
           didRun: data.did_run,
           runCalories: data.run_calories,
@@ -82,6 +84,7 @@ export const fetchDailyLog = async (date: string): Promise<DailyLog> => {
     // Garante migração também no LocalStorage
     return {
         ...allLogs[date],
+        sleepHours: allLogs[date].sleepHours || null, // Garante compatibilidade com dados antigos locais
         meals: migrateMeals(allLogs[date].meals)
     };
   }
@@ -102,6 +105,7 @@ export const saveDailyLog = async (log: DailyLog): Promise<void> => {
       const dbPayload = {
         date: log.date,
         weight: log.weight,
+        sleep_hours: log.sleepHours, // Mapeamento para o banco
         water_ml: log.waterMl,
         did_run: log.didRun,
         run_calories: log.runCalories,
@@ -164,6 +168,7 @@ export const fetchAllHistory = async (): Promise<DailyLog[]> => {
                 logs = data.map(d => ({
                     date: d.date,
                     weight: d.weight,
+                    sleepHours: d.sleep_hours, // Mapeamento do banco
                     waterMl: d.water_ml,
                     didRun: d.did_run,
                     runCalories: d.run_calories,
@@ -184,6 +189,7 @@ export const fetchAllHistory = async (): Promise<DailyLog[]> => {
         const allLogs: Record<string, any> = stored ? JSON.parse(stored) : {};
         logs = Object.values(allLogs).map(l => ({
             ...l,
+            sleepHours: l.sleepHours || null,
             meals: migrateMeals(l.meals)
         }));
     }
