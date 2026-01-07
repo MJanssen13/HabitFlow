@@ -1,10 +1,12 @@
+export type MealStatus = 'skipped' | 'off_diet' | 'on_diet';
+
 export interface MealLog {
-  breakfast: boolean;
-  morningSnack: boolean;
-  lunch: boolean;
-  afternoonSnack: boolean;
-  dinner: boolean;
-  supper: boolean;
+  breakfast: MealStatus;
+  morningSnack: MealStatus;
+  lunch: MealStatus;
+  afternoonSnack: MealStatus;
+  dinner: MealStatus;
+  supper: MealStatus;
 }
 
 export interface DailyLog {

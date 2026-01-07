@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAllHistory } from '../services/dataService';
 import { DailyLog } from '../types';
-import { Calendar, Search, Filter } from 'lucide-react';
+import { Calendar, Search, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) => {
   const [data, setData] = useState<DailyLog[]>([]);
@@ -18,6 +18,12 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
     log.date.includes(searchTerm) ||
     (log.notes && log.notes.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const getDietSummary = (meals: DailyLog['meals']) => {
+      const healthy = Object.values(meals).filter(m => m === 'on_diet').length;
+      const off = Object.values(meals).filter(m => m === 'off_diet').length;
+      return { healthy, off };
+  };
 
   if (data.length === 0) {
     return (
@@ -61,7 +67,9 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                    {filteredData.map((row) => (
+                    {filteredData.map((row) => {
+                        const dietStats = getDietSummary(row.meals);
+                        return (
                         <tr key={row.date} className="hover:bg-slate-50/50 transition-colors">
                             <td className="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
                                 {row.date.split('-').reverse().join('/')}
@@ -82,9 +90,21 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
                                 ) : '-'}
                             </td>
                             <td className="px-6 py-4">
-                                <div className="flex items-center gap-1">
-                                    <span className="font-medium text-slate-700">{Object.values(row.meals).filter(Boolean).length}</span>
-                                    <span className="text-slate-400">/6</span>
+                                <div className="flex items-center gap-3">
+                                    {dietStats.healthy === 0 && dietStats.off === 0 ? (
+                                        <span className="text-slate-300">-</span>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-center gap-1 text-emerald-600" title="Refeições Saudáveis">
+                                                <CheckCircle2 size={16} />
+                                                <span className="font-medium">{dietStats.healthy}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 text-red-500" title="Refeições Inadequadas">
+                                                <AlertCircle size={16} />
+                                                <span className="font-medium">{dietStats.off}</span>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </td>
                             <td className="px-6 py-4">
@@ -95,7 +115,7 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
                                 </div>
                             </td>
                         </tr>
-                    ))}
+                    )})}
                 </tbody>
             </table>
             {filteredData.length === 0 && (

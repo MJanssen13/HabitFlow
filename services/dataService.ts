@@ -1,4 +1,4 @@
-import { DailyLog } from '../types';
+import { DailyLog, MealLog, MealStatus } from '../types';
 import { supabase } from './supabaseClient';
 
 const STORAGE_KEY = 'habitflow_data';
@@ -17,14 +17,29 @@ export const getEmptyLog = (date: string): DailyLog => ({
   didGym: false,
   gymCalories: 0,
   meals: {
-    breakfast: false,
-    morningSnack: false,
-    lunch: false,
-    afternoonSnack: false,
-    dinner: false,
-    supper: false,
+    breakfast: 'skipped',
+    morningSnack: 'skipped',
+    lunch: 'skipped',
+    afternoonSnack: 'skipped',
+    dinner: 'skipped',
+    supper: 'skipped',
   },
 });
+
+// Helper para migrar dados antigos (boolean) para o novo formato (MealStatus)
+const migrateMeals = (meals: any): MealLog => {
+  const newMeals: any = {};
+  const keys = ['breakfast', 'morningSnack', 'lunch', 'afternoonSnack', 'dinner', 'supper'];
+  
+  keys.forEach(key => {
+    const val = meals[key];
+    if (val === true) newMeals[key] = 'on_diet';
+    else if (val === false) newMeals[key] = 'skipped';
+    else newMeals[key] = val || 'skipped'; // Mantém se já for string correta
+  });
+
+  return newMeals as MealLog;
+};
 
 // Detecta automaticamente se o Supabase está configurado
 const isSupabaseConfigured = !!supabase;
@@ -50,7 +65,7 @@ export const fetchDailyLog = async (date: string): Promise<DailyLog> => {
           runCalories: data.run_calories,
           didGym: data.did_gym,
           gymCalories: data.gym_calories,
-          meals: data.meals || getEmptyLog(date).meals,
+          meals: data.meals ? migrateMeals(data.meals) : getEmptyLog(date).meals,
           notes: data.notes
         };
       }
@@ -61,8 +76,17 @@ export const fetchDailyLog = async (date: string): Promise<DailyLog> => {
 
   // LocalStorage Fallback (funciona se Supabase falhar ou não estiver configurado)
   const stored = localStorage.getItem(STORAGE_KEY);
-  const allLogs: Record<string, DailyLog> = stored ? JSON.parse(stored) : {};
-  return allLogs[date] || getEmptyLog(date);
+  const allLogs: Record<string, any> = stored ? JSON.parse(stored) : {};
+  
+  if (allLogs[date]) {
+    // Garante migração também no LocalStorage
+    return {
+        ...allLogs[date],
+        meals: migrateMeals(allLogs[date].meals)
+    };
+  }
+  
+  return getEmptyLog(date);
 };
 
 export const saveDailyLog = async (log: DailyLog): Promise<void> => {
@@ -145,7 +169,7 @@ export const fetchAllHistory = async (): Promise<DailyLog[]> => {
                     runCalories: d.run_calories,
                     didGym: d.did_gym,
                     gymCalories: d.gym_calories,
-                    meals: d.meals || {},
+                    meals: d.meals ? migrateMeals(d.meals) : migrateMeals({}),
                     notes: d.notes
                 }));
             }
@@ -157,8 +181,11 @@ export const fetchAllHistory = async (): Promise<DailyLog[]> => {
     // Se não tiver dados do Supabase (ou erro), tenta misturar ou usar LocalStorage
     if (logs.length === 0) {
         const stored = localStorage.getItem(STORAGE_KEY);
-        const allLogs: Record<string, DailyLog> = stored ? JSON.parse(stored) : {};
-        logs = Object.values(allLogs);
+        const allLogs: Record<string, any> = stored ? JSON.parse(stored) : {};
+        logs = Object.values(allLogs).map(l => ({
+            ...l,
+            meals: migrateMeals(l.meals)
+        }));
     }
 
     return logs.sort((a, b) => a.date.localeCompare(b.date));

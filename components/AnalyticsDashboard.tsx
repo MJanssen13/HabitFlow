@@ -35,7 +35,8 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
   
   // Format Data for Charts
   const chartData = last30Days.map(log => {
-    const dietScore = Object.values(log.meals).filter(Boolean).length;
+    // A pontuação da dieta conta apenas refeições 'on_diet' (saudáveis)
+    const dietScore = Object.values(log.meals).filter(m => m === 'on_diet').length;
     const imc = log.weight ? log.weight / (HEIGHT * HEIGHT) : null;
     
     return {
@@ -112,14 +113,14 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
                         {/* Left Axis: Weight */}
                         <YAxis yAxisId="left" orientation="left" domain={['dataMin - 2', 'dataMax + 2']} axisLine={false} tickLine={false} tick={{fill: '#6366f1', fontSize: 12}} />
                         
-                        {/* Right Axis: IMC */}
-                        <YAxis yAxisId="right" orientation="right" domain={['dataMin - 0.5', 'dataMax + 0.5']} axisLine={false} tickLine={false} tick={{fill: '#8b5cf6', fontSize: 12}} />
+                        {/* Right Axis: IMC - Pink */}
+                        <YAxis yAxisId="right" orientation="right" domain={['dataMin - 0.5', 'dataMax + 0.5']} axisLine={false} tickLine={false} tick={{fill: '#ec4899', fontSize: 12}} />
                         
                         <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                         <Legend iconType="circle" />
                         
                         <Area yAxisId="left" type="monotone" dataKey="weight" name="Peso (kg)" stroke="#6366f1" strokeWidth={3} fill="url(#colorWeight)" />
-                        <Line yAxisId="right" type="monotone" dataKey="imc" name="IMC" stroke="#8b5cf6" strokeWidth={2} dot={{r: 3}} />
+                        <Line yAxisId="right" type="monotone" dataKey="imc" name="IMC" stroke="#ec4899" strokeWidth={2} dot={{r: 3}} />
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
@@ -146,7 +147,7 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
 
       {/* Diet Consistency Chart */}
       <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <h3 className="font-semibold text-slate-800 mb-6">Consistência na Dieta (Refeições/Dia)</h3>
+        <h3 className="font-semibold text-slate-800 mb-6">Consistência na Dieta (Refeições Saudáveis)</h3>
         <div className="h-56">
              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
@@ -154,7 +155,7 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
                     <YAxis domain={[0, 6]} axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
                     <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                    <Bar dataKey="dietScore" name="Refeições na Dieta" fill="#10b981" radius={[4, 4, 0, 0]} barSize={30} />
+                    <Bar dataKey="dietScore" name="Refeições Adequadas" fill="#10b981" radius={[4, 4, 0, 0]} barSize={30} />
                 </BarChart>
             </ResponsiveContainer>
         </div>
