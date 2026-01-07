@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Save, LayoutDashboard, BarChart3, History as HistoryIcon, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight, LayoutDashboard, BarChart3, History as HistoryIcon, Trash2, Check, Loader2, Cloud } from 'lucide-react';
 import { getTodayString, fetchDailyLog, saveDailyLog, clearDailyLog, getEmptyLog } from './services/dataService';
 import { DailyLog } from './types';
 
@@ -14,28 +14,23 @@ import HistoryView from './components/HistoryView';
 const App: React.FC = () => {
   const [date, setDate] = useState<string>(getTodayString());
   const [log, setLog] = useState<DailyLog | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const [activeTab, setActiveTab] = useState<'tracker' | 'analytics' | 'history'>('tracker');
   const [refreshDataTrigger, setRefreshDataTrigger] = useState(0);
+
+  // Ref para controlar o timeout do autosave
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load data when date changes
   useEffect(() => {
     const loadData = async () => {
       setLog(null); // Reset UI while loading
+      setSaveStatus('saved'); // Reseta status ao trocar de dia
       const data = await fetchDailyLog(date);
       setLog(data);
     };
     loadData();
   }, [date]);
-
-  // Handler for saving
-  const handleSave = async () => {
-    if (!log) return;
-    setIsSaving(true);
-    await saveDailyLog(log);
-    setIsSaving(false);
-    setRefreshDataTrigger(prev => prev + 1);
-  };
 
   // Handler for clearing
   const handleClear = async () => {
@@ -43,17 +38,40 @@ const App: React.FC = () => {
         return;
     }
     
-    setIsSaving(true); // Usa o estado de saving para loading visual
+    // Cancela qualquer salvamento pendente
+    if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+    }
+
+    setSaveStatus('saving');
     await clearDailyLog(date);
     setLog(getEmptyLog(date)); // Reseta a UI imediatamente
-    setIsSaving(false);
+    setSaveStatus('saved');
     setRefreshDataTrigger(prev => prev + 1);
   };
 
-  // Handler for updating local state
+  // Handler for updating local state with AUTOSAVE
   const updateLog = (updates: Partial<DailyLog>) => {
     if (!log) return;
-    setLog({ ...log, ...updates });
+    
+    // 1. Atualiza UI imediatamente para responsividade
+    const newLog = { ...log, ...updates };
+    setLog(newLog);
+
+    // 2. Lógica de Autosave (Debounce)
+    setSaveStatus('saving');
+    
+    // Limpa timer anterior se usuário continuar digitando/clicando
+    if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Define novo timer para salvar após 1 segundo de inatividade
+    saveTimeoutRef.current = setTimeout(async () => {
+        await saveDailyLog(newLog);
+        setSaveStatus('saved');
+        setRefreshDataTrigger(prev => prev + 1);
+    }, 1000);
   };
 
   const handleDateChange = (days: number) => {
@@ -119,21 +137,31 @@ const App: React.FC = () => {
                 <>
                     <button 
                         onClick={handleClear}
-                        disabled={isSaving}
                         title="Limpar dados do dia"
                         className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     >
                         <Trash2 size={18} />
                     </button>
                     
-                    <button 
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors disabled:opacity-50"
-                    >
-                        <Save size={18} />
-                        <span className="hidden sm:inline">{isSaving ? 'Salvando...' : 'Salvar'}</span>
-                    </button>
+                    {/* Status Indicator (Substitui botão Salvar) */}
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                        saveStatus === 'saving' 
+                        ? 'bg-indigo-50 text-indigo-600' 
+                        : 'bg-slate-100 text-slate-500'
+                    }`}>
+                        {saveStatus === 'saving' ? (
+                            <>
+                                <Loader2 size={14} className="animate-spin" />
+                                <span className="hidden sm:inline">Salvando...</span>
+                            </>
+                        ) : (
+                            <>
+                                <Cloud size={14} className="text-emerald-500" />
+                                <span className="hidden sm:inline">Salvo</span>
+                                <Check size={14} className="sm:hidden text-emerald-500" />
+                            </>
+                        )}
+                    </div>
                 </>
             )}
           </div>
