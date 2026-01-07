@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { fetchAllHistory } from '../services/dataService';
 import { DailyLog } from '../types';
-import { TrendingUp, Droplets, Utensils, Flame, Calendar, Moon } from 'lucide-react';
+import { TrendingUp, Droplets, Utensils, Flame, Calendar } from 'lucide-react';
 
 const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) => {
   const [data, setData] = useState<DailyLog[]>([]);
@@ -33,9 +33,6 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
   const totalCalories = last30Days.reduce((acc, curr) => acc + (curr.runCalories || 0) + (curr.gymCalories || 0), 0);
   const waterAvg = last30Days.reduce((acc, curr) => acc + curr.waterMl, 0) / last30Days.length;
   
-  const sleepDays = last30Days.filter(d => d.sleepHours !== null && d.sleepHours > 0);
-  const sleepAvg = sleepDays.reduce((acc, curr) => acc + (curr.sleepHours || 0), 0) / (sleepDays.length || 1);
-  
   // Format Data for Charts
   const chartData = last30Days.map(log => {
     const dietScore = Object.values(log.meals).filter(m => m === 'on_diet').length;
@@ -46,7 +43,6 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
         weight: log.weight,
         imc: imc ? parseFloat(imc.toFixed(2)) : null,
         water: log.waterMl,
-        sleep: log.sleepHours,
         calories: (log.runCalories || 0) + (log.gymCalories || 0),
         dietScore: dietScore
     };
@@ -56,7 +52,7 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
     <div className="space-y-6 animate-in fade-in duration-500">
       
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
             <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <TrendingUp size={18} />
@@ -64,15 +60,6 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
             </div>
             <span className="text-2xl font-bold text-slate-800">
                 {avgWeight ? avgWeight.toFixed(1) : '--'} <span className="text-sm font-normal text-slate-400">kg</span>
-            </span>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-2 text-indigo-500 mb-2">
-                <Moon size={18} />
-                <span className="text-xs font-semibold uppercase tracking-wider">Sono Médio</span>
-            </div>
-            <span className="text-2xl font-bold text-slate-800">
-                {sleepAvg ? sleepAvg.toFixed(1) : '--'} <span className="text-sm font-normal text-slate-400">h</span>
             </span>
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
@@ -93,7 +80,7 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
                 {Math.round(waterAvg)} <span className="text-sm font-normal text-slate-400">ml</span>
             </span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm col-span-2 md:col-span-2 lg:col-span-1">
+        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
             <div className="flex items-center gap-2 text-emerald-500 mb-2">
                 <Utensils size={18} />
                 <span className="text-xs font-semibold uppercase tracking-wider">Registros</span>
@@ -138,29 +125,6 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
             </div>
         </div>
 
-        {/* Sleep Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-            <h3 className="font-semibold text-slate-800 mb-6">Qualidade do Sono (Horas)</h3>
-            <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData}>
-                        <defs>
-                            <linearGradient id="colorSleep" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
-                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
-                        <YAxis domain={[0, 12]} axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                        <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                        <Legend iconType="circle" />
-                        <Area type="monotone" dataKey="sleep" name="Horas de Sono" stroke="#6366f1" fill="url(#colorSleep)" strokeWidth={3} />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
-
         {/* Calories Burned Chart */}
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <h3 className="font-semibold text-slate-800 mb-6">Calorias Queimadas (Exercícios)</h3>
@@ -179,7 +143,7 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
         </div>
 
         {/* Diet Consistency Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2">
             <h3 className="font-semibold text-slate-800 mb-6">Consistência na Dieta (Refeições Saudáveis)</h3>
             <div className="h-72">
                  <ResponsiveContainer width="100%" height="100%">

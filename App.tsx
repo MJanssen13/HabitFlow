@@ -8,7 +8,6 @@ import WaterTracker from './components/WaterTracker';
 import DietTracker from './components/DietTracker';
 import ExerciseTracker from './components/ExerciseTracker';
 import WeightWidget from './components/WeightWidget';
-import SleepTracker from './components/SleepTracker';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import HistoryView from './components/HistoryView';
 
@@ -150,7 +149,6 @@ const App: React.FC = () => {
                     {/* Coluna 1: Dados Vitais */}
                     <div className="flex flex-col gap-6 md:col-span-1">
                         <WeightWidget data={log} onChange={updateLog} />
-                        <SleepTracker data={log} onChange={updateLog} />
                     </div>
 
                     {/* Coluna 2: Água e Exercícios */}

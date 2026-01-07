@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAllHistory } from '../services/dataService';
 import { DailyLog } from '../types';
-import { Calendar, Search, CheckCircle2, AlertCircle, Moon } from 'lucide-react';
+import { Calendar, Search, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) => {
   const [data, setData] = useState<DailyLog[]>([]);
@@ -60,7 +60,6 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
                     <tr>
                         <th className="px-6 py-4 font-medium">Data</th>
                         <th className="px-6 py-4 font-medium">Peso</th>
-                        <th className="px-6 py-4 font-medium">Sono</th>
                         <th className="px-6 py-4 font-medium">Água</th>
                         <th className="px-6 py-4 font-medium">Calorias</th>
                         <th className="px-6 py-4 font-medium">Dieta</th>
@@ -77,14 +76,6 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
                             </td>
                             <td className="px-6 py-4">
                                 {row.weight ? <span className="font-semibold text-slate-700">{row.weight} kg</span> : '-'}
-                            </td>
-                            <td className="px-6 py-4">
-                                {row.sleepHours ? (
-                                    <div className="flex items-center gap-1.5 text-indigo-600">
-                                        <Moon size={14} />
-                                        <span className="font-medium">{row.sleepHours}h</span>
-                                    </div>
-                                ) : '-'}
                             </td>
                             <td className="px-6 py-4">
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.waterMl >= 2500 ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
