@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Minus, Plus } from 'lucide-react';
+import { Moon } from 'lucide-react';
 import { DailyLog } from '../types';
 
 interface Props {
@@ -10,15 +10,34 @@ interface Props {
 const SleepTracker: React.FC<Props> = ({ data, onChange }) => {
   const currentSleep = data.sleepHours || 0;
 
-  const updateSleep = (increment: number) => {
-    let newValue = currentSleep + increment;
-    if (newValue < 0) newValue = 0;
-    if (newValue > 24) newValue = 24;
-    onChange({ sleepHours: newValue === 0 ? null : newValue });
+  // Converte decimal (ex: 7.5) para string de hora (ex: "07:30")
+  const decimalToTimeString = (decimal: number | null): string => {
+    if (decimal === null) return '';
+    const hrs = Math.floor(decimal);
+    const mins = Math.round((decimal - hrs) * 60);
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
   };
 
-  const getSleepQualityColor = (hours: number) => {
-    if (hours === 0) return 'text-slate-300';
+  // Converte string de hora (ex: "07:30") para decimal (ex: 7.5)
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (!val) {
+        onChange({ sleepHours: null });
+        return;
+    }
+
+    const [hoursStr, minsStr] = val.split(':');
+    const hours = parseInt(hoursStr, 10);
+    const mins = parseInt(minsStr, 10);
+    
+    // Converte minutos para fração de hora
+    const decimalValue = hours + (mins / 60);
+    
+    onChange({ sleepHours: decimalValue });
+  };
+
+  const getSleepQualityColor = (hours: number | null) => {
+    if (!hours || hours === 0) return 'text-slate-300';
     if (hours < 5) return 'text-red-500';
     if (hours < 7) return 'text-orange-500';
     if (hours <= 9) return 'text-indigo-500';
@@ -42,35 +61,19 @@ const SleepTracker: React.FC<Props> = ({ data, onChange }) => {
         <h3 className="font-semibold text-slate-800">Sono</h3>
       </div>
 
-      <div className="flex items-center justify-between mt-2">
-        <div className="flex flex-col">
-            <div className="flex items-end gap-1">
-                <span className={`text-4xl font-bold transition-colors ${getSleepQualityColor(currentSleep)}`}>
-                    {currentSleep > 0 ? currentSleep : '--'}
-                </span>
-                <span className="text-slate-400 font-medium mb-2 text-sm">h</span>
-            </div>
-            <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">
-                {getSleepMessage(currentSleep)}
-            </span>
+      <div className="flex flex-col mt-2">
+        <div className="flex items-end gap-1 mb-1">
+            <input 
+                type="time"
+                value={decimalToTimeString(data.sleepHours)}
+                onChange={handleTimeChange}
+                className={`text-4xl font-bold bg-transparent border-b-2 border-transparent hover:border-slate-100 focus:border-indigo-500 focus:outline-none transition-colors ${getSleepQualityColor(data.sleepHours)} placeholder:text-slate-200 w-full cursor-pointer`}
+                style={{ colorScheme: data.sleepHours && data.sleepHours > 0 ? 'light' : 'light' }} 
+            />
         </div>
-
-        <div className="flex gap-2">
-            <button 
-                onClick={() => updateSleep(-0.5)}
-                className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95"
-                title="Reduzir 30min"
-            >
-                <Minus size={18} />
-            </button>
-            <button 
-                onClick={() => updateSleep(0.5)}
-                className="p-2 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 hover:bg-indigo-100 hover:border-indigo-200 transition-all active:scale-95"
-                title="Adicionar 30min"
-            >
-                <Plus size={18} />
-            </button>
-        </div>
+        <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">
+            {getSleepMessage(currentSleep)}
+        </span>
       </div>
     </div>
   );
