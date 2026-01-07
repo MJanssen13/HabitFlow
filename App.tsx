@@ -157,7 +157,8 @@ const App: React.FC = () => {
                     <div className="md:col-span-1">
                         <WaterTracker data={log} onChange={updateLog} />
                     </div>
-                    <div className="md:hidden lg:block lg:col-span-1">
+                    {/* Alterado de md:hidden para hidden, garantindo que só apareça em telas Large */}
+                    <div className="hidden lg:block lg:col-span-1">
                         <ExerciseTracker data={log} onChange={updateLog} />
                     </div>
 
