@@ -1,28 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAllHistory } from '../services/dataService';
 import { DailyLog } from '../types';
-import { Calendar, Search, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Calendar, Search, CheckCircle2, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 
 const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) => {
   const [data, setData] = useState<DailyLog[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     fetchAllHistory().then((logs) => {
-        // Sort by date descending (newest first)
-        setData(logs.sort((a, b) => b.date.localeCompare(a.date)));
+        // Carrega os dados brutos, a ordenação será feita na renderização
+        setData(logs);
     });
   }, [refreshTrigger]);
 
-  const filteredData = data.filter(log =>
-    log.date.includes(searchTerm) ||
-    (log.notes && log.notes.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredAndSortedData = data
+    .filter(log =>
+        log.date.includes(searchTerm) ||
+        (log.notes && log.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => {
+        if (sortOrder === 'asc') {
+            return a.date.localeCompare(b.date);
+        } else {
+            return b.date.localeCompare(a.date);
+        }
+    });
 
   const getDietSummary = (meals: DailyLog['meals']) => {
       const healthy = Object.values(meals).filter(m => m === 'on_diet').length;
       const off = Object.values(meals).filter(m => m === 'off_diet').length;
       return { healthy, off };
+  };
+
+  const toggleSort = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
 
   if (data.length === 0) {
@@ -58,7 +71,16 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
             <table className="w-full text-sm text-left text-slate-600 relative">
                 <thead className="text-xs text-slate-400 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
                     <tr>
-                        <th className="px-6 py-4 font-medium">Data</th>
+                        <th 
+                            className="px-6 py-4 font-medium cursor-pointer hover:bg-slate-100 transition-colors group select-none"
+                            onClick={toggleSort}
+                            title="Clique para ordenar"
+                        >
+                            <div className="flex items-center gap-1 text-indigo-600">
+                                Data
+                                {sortOrder === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+                            </div>
+                        </th>
                         <th className="px-6 py-4 font-medium">Peso</th>
                         <th className="px-6 py-4 font-medium">Água</th>
                         <th className="px-6 py-4 font-medium">Calorias</th>
@@ -67,7 +89,7 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                    {filteredData.map((row) => {
+                    {filteredAndSortedData.map((row) => {
                         const dietStats = getDietSummary(row.meals);
                         return (
                         <tr key={row.date} className="hover:bg-slate-50/50 transition-colors">
@@ -118,7 +140,7 @@ const HistoryView: React.FC<{ refreshTrigger: number }> = ({ refreshTrigger }) =
                     )})}
                 </tbody>
             </table>
-            {filteredData.length === 0 && (
+            {filteredAndSortedData.length === 0 && (
                 <div className="p-8 text-center text-slate-400">
                     Nenhum resultado encontrado para sua busca.
                 </div>
