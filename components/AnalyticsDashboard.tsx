@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { fetchAllHistory } from '../services/dataService';
 import { DailyLog } from '../types';
-import { TrendingUp, TrendingDown, Droplets, Utensils, Flame, Calendar as CalendarIcon, Target, Minus, ChevronLeft, ChevronRight, Dumbbell, Footprints, Check } from 'lucide-react';
+import { TrendingUp, TrendingDown, Droplets, Utensils, Flame, Calendar as CalendarIcon, Target, Minus, ChevronLeft, ChevronRight, Dumbbell, Footprints, Check, Activity } from 'lucide-react';
 
 // --- Sub-componentes para o Calendário ---
 
@@ -235,7 +235,7 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
   const totalCalories = last30Days.reduce((acc, curr) => acc + (curr.runCalories || 0) + (curr.gymCalories || 0), 0);
   const waterAvg = last30Days.reduce((acc, curr) => acc + curr.waterMl, 0) / last30Days.length;
   
-  // Cálculo de Variação de Peso (Primeiro registro vs Último registro em TODO o histórico)
+  // Cálculo de Variação de Peso
   const weightRecords = data.filter(d => d.weight !== null && d.weight > 0);
   let weightDiff = 0;
   let weightDiffPct = 0;
@@ -249,7 +249,6 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
       hasVariation = true;
   }
 
-  // Helper para renderizar variação
   const renderWeightVariation = () => {
     if (!hasVariation) return <span className="text-xs text-slate-400 mt-1 block">Sem variação registrada</span>;
     
@@ -269,7 +268,7 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
     );
   };
   
-  // Cálculo de Adesão à Dieta (Refeições Saudáveis / Total Realizadas)
+  // Adesão à Dieta
   let totalHealthyMeals = 0;
   let totalRealizedMeals = 0;
 
@@ -281,13 +280,16 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
           } else if (status === 'off_diet') {
               totalRealizedMeals++;
           }
-          // 'skipped' não conta para o denominador de adesão
       });
   });
 
   const dietAdherence = totalRealizedMeals > 0 
       ? Math.round((totalHealthyMeals / totalRealizedMeals) * 100) 
       : 0;
+
+  // NOVO CÁLCULO: Frequência de Exercícios
+  const activeDaysCount = data.filter(d => d.didRun || d.didGym).length;
+  const activePercentage = data.length > 0 ? Math.round((activeDaysCount / data.length) * 100) : 0;
 
   // Format Data for Charts
   const chartData = last30Days.map(log => {
@@ -308,8 +310,7 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
     <div className="space-y-6 animate-in fade-in duration-500">
       
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* ... Cards ... */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
             <div>
                 <div className="flex items-center gap-2 text-indigo-500 mb-2">
@@ -345,7 +346,6 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
             </div>
         </div>
         
-        {/* Novo Card: Adesão à Dieta */}
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
             <div>
                 <div className="flex items-center gap-2 text-emerald-600 mb-2">
@@ -367,6 +367,24 @@ const AnalyticsDashboard: React.FC<{ refreshTrigger: number }> = ({ refreshTrigg
                 <span className="text-2xl font-bold text-slate-800">
                     {data.length} <span className="text-sm font-normal text-slate-400">dias</span>
                 </span>
+            </div>
+        </div>
+
+        {/* Novo Card: Frequência Ativa */}
+        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
+            <div>
+                <div className="flex items-center gap-2 text-fuchsia-500 mb-2">
+                    <Activity size={18} />
+                    <span className="text-xs font-semibold uppercase tracking-wider">Dias Ativos</span>
+                </div>
+                <span className="text-2xl font-bold text-slate-800">
+                    {activeDaysCount} <span className="text-sm font-normal text-slate-400">dias</span>
+                </span>
+            </div>
+             <div className="mt-1">
+                 <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full" title="Porcentagem de dias com exercício no histórico">
+                    {activePercentage}% dos dias
+                 </span>
             </div>
         </div>
       </div>
