@@ -9,28 +9,40 @@ import { TrendingUp, TrendingDown, Droplets, Utensils, Flame, Calendar as Calend
 
 // --- Sub-componentes para o Calendário ---
 
-const MiniRingChart: React.FC<{ percentage: number; color: string; showCheckOnComplete?: boolean }> = ({ percentage, color, showCheckOnComplete }) => {
-    // Aumentado o raio e a espessura para ficar mais visível
-    const radius = 18;
-    const stroke = 5;
+interface MiniRingProps {
+    percentage: number;
+    color: string;
+    showCheckOnComplete?: boolean;
+    size?: number;
+    strokeWidth?: number;
+}
+
+const MiniRingChart: React.FC<MiniRingProps> = ({ 
+    percentage, 
+    color, 
+    showCheckOnComplete, 
+    size = 40, 
+    strokeWidth = 5 
+}) => {
+    const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (Math.min(percentage, 100) / 100) * circumference;
     const isComplete = percentage >= 100;
   
     return (
-      <div className="relative w-10 h-10 flex items-center justify-center">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 44 44">
+      <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+        <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
           <circle
-            cx="22" cy="22" r={radius}
+            cx={size / 2} cy={size / 2} r={radius}
             fill="none"
             stroke="#f1f5f9"
-            strokeWidth={stroke}
+            strokeWidth={strokeWidth}
           />
           <circle
-            cx="22" cy="22" r={radius}
+            cx={size / 2} cy={size / 2} r={radius}
             fill="none"
             stroke={color}
-            strokeWidth={stroke}
+            strokeWidth={strokeWidth}
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
@@ -39,10 +51,10 @@ const MiniRingChart: React.FC<{ percentage: number; color: string; showCheckOnCo
         </svg>
         {showCheckOnComplete && isComplete ? (
             <div className="absolute inset-0 flex items-center justify-center text-emerald-600">
-                <Check size={16} strokeWidth={4} />
+                <Check size={size * 0.4} strokeWidth={4} />
             </div>
         ) : (
-             <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
+             <div className="absolute inset-0 flex items-center justify-center font-bold text-slate-600" style={{ fontSize: size * 0.25 }}>
                 {Math.round(percentage)}%
              </div>
         )}
@@ -85,119 +97,133 @@ const CalendarWidget: React.FC<{ logs: DailyLog[] }> = ({ logs }) => {
     const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                    <CalendarIcon size={20} className="text-slate-500"/>
-                    Calendário de Hábitos
+        <div className="bg-white p-3 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+                <h3 className="font-semibold text-slate-800 flex items-center gap-2 text-sm md:text-base">
+                    <CalendarIcon size={18} className="text-slate-500 md:w-5 md:h-5"/>
+                    Calendário
                 </h3>
-                <div className="flex items-center gap-4">
-                    <button onClick={handlePrevMonth} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronLeft size={20}/></button>
-                    <span className="font-medium text-slate-700 min-w-[120px] text-center">{monthNames[month]} {year}</span>
-                    <button onClick={handleNextMonth} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronRight size={20}/></button>
+                <div className="flex items-center gap-2 md:gap-4">
+                    <button onClick={handlePrevMonth} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronLeft size={18}/></button>
+                    <span className="font-medium text-slate-700 min-w-[90px] md:min-w-[120px] text-center text-sm md:text-base">{monthNames[month]} {year}</span>
+                    <button onClick={handleNextMonth} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronRight size={18}/></button>
                 </div>
             </div>
 
-            {/* Container com rolagem horizontal para mobile */}
-            <div className="overflow-x-auto pb-2 -mx-2 px-2 md:mx-0 md:px-0">
-                <div className="min-w-[800px]"> {/* Largura mínima forçada para garantir layout correto */}
-                    <div className="grid grid-cols-7 gap-px bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
-                        {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(d => (
-                            <div key={d} className="bg-slate-50 p-2 text-center text-xs font-semibold text-slate-400 uppercase">
-                                {d}
-                            </div>
-                        ))}
+            <div className="w-full">
+                {/* Cabeçalho dias da semana */}
+                <div className="grid grid-cols-7 gap-px mb-1">
+                    {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
+                        <div key={i} className="text-center text-[10px] md:text-xs font-semibold text-slate-400 uppercase py-1">
+                            {d}
+                        </div>
+                    ))}
+                </div>
 
-                        {days.map((day, idx) => {
-                            if (!day) return <div key={`empty-${idx}`} className="bg-white min-h-[120px]" />;
-                            
-                            // Find log for this day
-                            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                            const log = logs.find(l => l.date === dateStr);
+                {/* Grid do Calendário */}
+                <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-lg overflow-hidden border border-slate-200">
+                    {days.map((day, idx) => {
+                        if (!day) return <div key={`empty-${idx}`} className="bg-white min-h-[70px] md:min-h-[120px]" />;
+                        
+                        // Find log for this day
+                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        const log = logs.find(l => l.date === dateStr);
 
-                            // Calculations
-                            let waterPct = 0;
-                            let dietPct = 0;
-                            
-                            if (log) {
-                                // Water
-                                waterPct = (log.waterMl / waterGoal) * 100;
+                        // Calculations
+                        let waterPct = 0;
+                        let dietPct = 0;
+                        
+                        if (log) {
+                            waterPct = (log.waterMl / waterGoal) * 100;
+                            let healthy = 0;
+                            let total = 0;
+                            Object.values(log.meals).forEach(status => {
+                                if (status === 'on_diet') { healthy++; total++; }
+                                else if (status === 'off_diet') { total++; }
+                            });
+                            dietPct = total > 0 ? (healthy / total) * 100 : 0;
+                        }
 
-                                // Diet
-                                let healthy = 0;
-                                let total = 0;
-                                Object.values(log.meals).forEach(status => {
-                                    if (status === 'on_diet') { healthy++; total++; }
-                                    else if (status === 'off_diet') { total++; }
-                                });
-                                dietPct = total > 0 ? (healthy / total) * 100 : 0;
-                            }
-
-                            return (
-                                <div key={dateStr} className="bg-white min-h-[120px] p-2 flex flex-col hover:bg-slate-50 transition-colors group relative">
-                                    <span className={`text-sm font-medium mb-1 ${log ? 'text-slate-700' : 'text-slate-300'}`}>{day}</span>
-                                    
-                                    {log && (
-                                        <div className="flex-1 flex items-center justify-center">
-                                            {/* Grid 2x2 para os ícones */}
-                                            <div className="grid grid-cols-2 gap-2">
-                                                
-                                                {/* Topo Esquerda: Água */}
-                                                <div className="flex items-center justify-center" title={`Água: ${log.waterMl}ml (${Math.round(waterPct)}%)`}>
-                                                    <MiniRingChart percentage={waterPct} color="#3b82f6" showCheckOnComplete={true} />
-                                                </div>
-
-                                                {/* Topo Direita: Dieta */}
-                                                <div className="flex items-center justify-center" title={`Adesão à dieta: ${Math.round(dietPct)}%`}>
-                                                    <MiniRingChart percentage={dietPct} color="#10b981" showCheckOnComplete={false} />
-                                                </div>
-
-                                                {/* Baixo Esquerda: Corrida (ou vazio) */}
-                                                <div className="flex items-center justify-center">
-                                                    {log.didRun ? (
-                                                        <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center border border-orange-200" title="Corrida realizada">
-                                                            <Footprints size={18} />
-                                                        </div>
-                                                    ) : <div className="w-10 h-10" />}
-                                                </div>
-
-                                                {/* Baixo Direita: Academia (ou vazio) */}
-                                                <div className="flex items-center justify-center">
-                                                    {log.didGym ? (
-                                                        <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center border border-purple-200" title="Academia realizada">
-                                                            <Dumbbell size={18} />
-                                                        </div>
-                                                    ) : <div className="w-10 h-10" />}
-                                                </div>
-
+                        return (
+                            <div key={dateStr} className="bg-white min-h-[70px] md:min-h-[120px] p-0.5 md:p-2 flex flex-col hover:bg-slate-50 transition-colors group relative">
+                                <span className={`text-[10px] md:text-sm font-medium mb-0.5 ml-1 ${log ? 'text-slate-700' : 'text-slate-300'}`}>{day}</span>
+                                
+                                {log && (
+                                    <div className="flex-1 flex flex-col items-center justify-center gap-1">
+                                        
+                                        {/* Versão Mobile (Micro) */}
+                                        <div className="grid grid-cols-2 gap-0.5 w-full place-items-center md:hidden">
+                                            <MiniRingChart percentage={waterPct} color="#3b82f6" size={20} strokeWidth={3} />
+                                            <MiniRingChart percentage={dietPct} color="#10b981" size={20} strokeWidth={3} />
+                                            
+                                            <div className="flex items-center justify-center h-5 w-5">
+                                                {log.didRun && (
+                                                    <div className="text-orange-500">
+                                                        <Footprints size={12} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center justify-center h-5 w-5">
+                                                {log.didGym && (
+                                                    <div className="text-purple-600">
+                                                        <Dumbbell size={12} />
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
+
+                                        {/* Versão Desktop (Normal) */}
+                                        <div className="hidden md:grid grid-cols-2 gap-2">
+                                            <div className="flex items-center justify-center" title={`Água: ${log.waterMl}ml (${Math.round(waterPct)}%)`}>
+                                                <MiniRingChart percentage={waterPct} color="#3b82f6" showCheckOnComplete={true} size={40} strokeWidth={5} />
+                                            </div>
+                                            <div className="flex items-center justify-center" title={`Adesão à dieta: ${Math.round(dietPct)}%`}>
+                                                <MiniRingChart percentage={dietPct} color="#10b981" showCheckOnComplete={false} size={40} strokeWidth={5} />
+                                            </div>
+                                            <div className="flex items-center justify-center">
+                                                {log.didRun ? (
+                                                    <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center border border-orange-200" title="Corrida realizada">
+                                                        <Footprints size={18} />
+                                                    </div>
+                                                ) : <div className="w-10 h-10" />}
+                                            </div>
+                                            <div className="flex items-center justify-center">
+                                                {log.didGym ? (
+                                                    <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center border border-purple-200" title="Academia realizada">
+                                                        <Dumbbell size={18} />
+                                                    </div>
+                                                ) : <div className="w-10 h-10" />}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
             
             {/* Legenda Atualizada */}
-            <div className="flex flex-wrap gap-4 mt-4 text-xs text-slate-500 justify-center">
+            <div className="flex flex-wrap gap-2 md:gap-4 mt-4 text-[10px] md:text-xs text-slate-500 justify-center">
                 <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full border-2 border-blue-500"></div>
+                    <div className="w-2 h-2 md:w-3 md:h-3 rounded-full border-2 border-blue-500"></div>
                     <span>Água</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full border-2 border-emerald-500"></div>
+                    <div className="w-2 h-2 md:w-3 md:h-3 rounded-full border-2 border-emerald-500"></div>
                     <span>Dieta</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className="bg-orange-100 text-orange-600 p-0.5 rounded">
+                    <Footprints size={10} className="text-orange-600 md:hidden" />
+                    <div className="hidden md:block bg-orange-100 text-orange-600 p-0.5 rounded">
                         <Footprints size={12} />
                     </div>
                     <span>Corrida</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className="bg-purple-100 text-purple-600 p-0.5 rounded">
+                    <Dumbbell size={10} className="text-purple-600 md:hidden" />
+                    <div className="hidden md:block bg-purple-100 text-purple-600 p-0.5 rounded">
                         <Dumbbell size={12} />
                     </div>
                     <span>Academia</span>
