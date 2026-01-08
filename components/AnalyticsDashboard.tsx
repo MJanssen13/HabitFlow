@@ -123,7 +123,7 @@ const CalendarWidget: React.FC<{ logs: DailyLog[] }> = ({ logs }) => {
                 {/* Grid do Calendário */}
                 <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-lg overflow-hidden border border-slate-200">
                     {days.map((day, idx) => {
-                        if (!day) return <div key={`empty-${idx}`} className="bg-white min-h-[70px] md:min-h-[120px]" />;
+                        if (!day) return <div key={`empty-${idx}`} className="bg-white min-h-[85px] md:min-h-[120px]" />;
                         
                         // Find log for this day
                         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -145,30 +145,20 @@ const CalendarWidget: React.FC<{ logs: DailyLog[] }> = ({ logs }) => {
                         }
 
                         return (
-                            <div key={dateStr} className="bg-white min-h-[70px] md:min-h-[120px] p-0.5 md:p-2 flex flex-col hover:bg-slate-50 transition-colors group relative">
+                            <div key={dateStr} className="bg-white min-h-[85px] md:min-h-[120px] p-0.5 md:p-2 flex flex-col hover:bg-slate-50 transition-colors group relative">
                                 <span className={`text-[10px] md:text-sm font-medium mb-0.5 ml-1 ${log ? 'text-slate-700' : 'text-slate-300'}`}>{day}</span>
                                 
                                 {log && (
                                     <div className="flex-1 flex flex-col items-center justify-center gap-1">
                                         
-                                        {/* Versão Mobile (Micro) */}
-                                        <div className="grid grid-cols-2 gap-0.5 w-full place-items-center md:hidden">
-                                            <MiniRingChart percentage={waterPct} color="#3b82f6" size={20} strokeWidth={3} />
-                                            <MiniRingChart percentage={dietPct} color="#10b981" size={20} strokeWidth={3} />
+                                        {/* Versão Mobile (Micro) - Vertical Stack */}
+                                        <div className="flex flex-col items-center justify-center gap-1 w-full md:hidden">
+                                            <MiniRingChart percentage={waterPct} color="#3b82f6" size={28} strokeWidth={4} />
+                                            <MiniRingChart percentage={dietPct} color="#10b981" size={28} strokeWidth={4} />
                                             
-                                            <div className="flex items-center justify-center h-5 w-5">
-                                                {log.didRun && (
-                                                    <div className="text-orange-500">
-                                                        <Footprints size={12} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center justify-center h-5 w-5">
-                                                {log.didGym && (
-                                                    <div className="text-purple-600">
-                                                        <Dumbbell size={12} />
-                                                    </div>
-                                                )}
+                                            <div className="flex items-center gap-1 mt-0.5 h-3">
+                                                {log.didRun && <Footprints size={12} className="text-orange-500" />}
+                                                {log.didGym && <Dumbbell size={12} className="text-purple-600" />}
                                             </div>
                                         </div>
 
