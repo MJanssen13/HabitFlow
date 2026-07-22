@@ -1,0 +1,51 @@
+<!-- @dsCard group="Componentes" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{--surface:#fff;--content:#0f172a;--muted:#64748b;--faint:#94a3b8;--base:#f8fafc;--line:#e2e8f0;--elevated:#f1f5f9;--brand:#4f46e5;--brand-soft:#e0e7ff;}
+  .dark{--surface:#0f172a;--content:#f1f5f9;--muted:#94a3b8;--faint:#64748b;--base:#020617;--line:#1e293b;--elevated:#1e293b;--brand:#818cf8;--brand-soft:#312e81;}
+  *{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
+  body{margin:0;}
+  .stage{display:grid;grid-template-columns:1fr 1fr;}
+  .panel{padding:32px;background:var(--base);color:var(--content);}
+  h2.title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin:0 0 18px;font-weight:700;}
+  .lbl{font-size:12px;color:var(--muted);margin:18px 0 8px;font-weight:600;}
+  .switch{width:44px;height:24px;border-radius:9999px;position:relative;display:inline-block;}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
+  .switch.on{background:#f97316;}.switch.on::after{left:22px;}
+  .switch.on.purple{background:#a855f7;}
+  .switch.off{background:var(--line);}
+  .tabs{display:inline-flex;background:var(--elevated);border:1px solid var(--line);border-radius:12px;padding:4px;gap:2px;}
+  .tab{padding:6px 16px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted);}
+  .tab.active{background:var(--surface);color:var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .check{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;}
+  .check.on{background:#f43f5e;border-color:#f43f5e;color:#fff;}
+  .rowc{display:flex;gap:16px;align-items:center;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="panel">
+    <h2 class="title">Controles</h2>
+    <div class="lbl">Toggle</div>
+    <div class="rowc"><span class="switch on"></span><span class="switch on purple"></span><span class="switch off"></span></div>
+    <div class="lbl">Abas</div>
+    <div class="tabs"><span class="tab active">Diário</span><span class="tab">Análises</span><span class="tab">Histórico</span></div>
+    <div class="lbl">Checkbox (medicamento)</div>
+    <div class="rowc"><span class="check on"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="check off"></span></div>
+  </div>
+  <div class="panel dark">
+    <h2 class="title">Controles</h2>
+    <div class="lbl">Toggle</div>
+    <div class="rowc"><span class="switch on"></span><span class="switch on purple"></span><span class="switch off"></span></div>
+    <div class="lbl">Abas</div>
+    <div class="tabs"><span class="tab active">Diário</span><span class="tab">Análises</span><span class="tab">Histórico</span></div>
+    <div class="lbl">Checkbox (medicamento)</div>
+    <div class="rowc"><span class="check on"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="check off"></span></div>
+  </div>
+</div>
+</body>
+</html>

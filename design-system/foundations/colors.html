@@ -1,0 +1,68 @@
+<!-- @dsCard group="Fundações" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{--base:#f8fafc;--surface:#fff;--elevated:#f1f5f9;--line:#e2e8f0;--content:#0f172a;--muted:#64748b;--faint:#94a3b8;--brand:#4f46e5;--brand-soft:#e0e7ff;}
+  .dark{--base:#020617;--surface:#0f172a;--elevated:#1e293b;--line:#1e293b;--content:#f1f5f9;--muted:#94a3b8;--faint:#64748b;--brand:#818cf8;--brand-soft:#312e81;}
+  *{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
+  body{margin:0;}
+  .stage{display:grid;grid-template-columns:1fr 1fr;}
+  .panel{padding:28px;background:var(--base);color:var(--content);min-height:100%;}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin:0 0 16px;font-weight:700;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .swatch{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px;}
+  .chip{width:36px;height:36px;border-radius:9px;border:1px solid rgba(148,163,184,.25);flex:none;}
+  .name{font-size:13px;font-weight:600;color:var(--content);}
+  .hex{font-size:11px;color:var(--muted);font-family:ui-monospace,monospace;}
+  .accents{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
+  .dot{width:32px;height:32px;border-radius:50%;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <!-- LIGHT -->
+  <div class="panel">
+    <h2>Tokens · Claro</h2>
+    <div class="grid">
+      <div class="swatch"><span class="chip" style="background:var(--base)"></span><div><div class="name">base</div><div class="hex">#f8fafc</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--surface)"></span><div><div class="name">surface</div><div class="hex">#ffffff</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--elevated)"></span><div><div class="name">elevated</div><div class="hex">#f1f5f9</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--line)"></span><div><div class="name">line</div><div class="hex">#e2e8f0</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--content)"></span><div><div class="name">content</div><div class="hex">#0f172a</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--brand)"></span><div><div class="name">brand</div><div class="hex">#4f46e5</div></div></div>
+    </div>
+    <div class="accents">
+      <span class="dot" style="background:#3b82f6"></span>
+      <span class="dot" style="background:#10b981"></span>
+      <span class="dot" style="background:#f97316"></span>
+      <span class="dot" style="background:#a855f7"></span>
+      <span class="dot" style="background:#f43f5e"></span>
+      <span class="dot" style="background:#f59e0b"></span>
+    </div>
+  </div>
+  <!-- DARK -->
+  <div class="panel dark">
+    <h2>Tokens · Escuro</h2>
+    <div class="grid">
+      <div class="swatch"><span class="chip" style="background:var(--base)"></span><div><div class="name">base</div><div class="hex">#020617</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--surface)"></span><div><div class="name">surface</div><div class="hex">#0f172a</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--elevated)"></span><div><div class="name">elevated</div><div class="hex">#1e293b</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--line)"></span><div><div class="name">line</div><div class="hex">#1e293b</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--content)"></span><div><div class="name">content</div><div class="hex">#f1f5f9</div></div></div>
+      <div class="swatch"><span class="chip" style="background:var(--brand)"></span><div><div class="name">brand</div><div class="hex">#818cf8</div></div></div>
+    </div>
+    <div class="accents">
+      <span class="dot" style="background:#3b82f6"></span>
+      <span class="dot" style="background:#10b981"></span>
+      <span class="dot" style="background:#f97316"></span>
+      <span class="dot" style="background:#a855f7"></span>
+      <span class="dot" style="background:#f43f5e"></span>
+      <span class="dot" style="background:#f59e0b"></span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

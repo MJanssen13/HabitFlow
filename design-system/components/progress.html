@@ -1,0 +1,63 @@
+<!-- @dsCard group="Componentes" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{--surface:#fff;--content:#0f172a;--muted:#64748b;--faint:#94a3b8;--base:#f8fafc;--line:#e2e8f0;--elevated:#f1f5f9;--brand:#4f46e5;}
+  .dark{--surface:#0f172a;--content:#f1f5f9;--muted:#94a3b8;--faint:#64748b;--base:#020617;--line:#1e293b;--elevated:#1e293b;--brand:#818cf8;}
+  *{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
+  body{margin:0;}
+  .stage{display:grid;grid-template-columns:1fr 1fr;}
+  .panel{padding:32px;background:var(--base);color:var(--content);}
+  h2.title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin:0 0 20px;font-weight:700;}
+  .rings{display:flex;gap:28px;align-items:center;margin-bottom:24px;}
+  .ring{position:relative;width:110px;height:110px;}
+  .ring .txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring .big{font-size:26px;font-weight:800;}
+  .ring .cap{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);}
+  .streak{display:inline-flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .fire{width:36px;height:36px;border-radius:10px;background:rgba(249,115,22,.12);color:#f97316;display:flex;align-items:center;justify-content:center;}
+  .sk .n{font-weight:800;font-size:14px;}.sk .l{font-size:11px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="panel">
+    <h2 class="title">Progresso & Sequência</h2>
+    <div class="rings">
+      <div class="ring">
+        <svg width="110" height="110" viewBox="0 0 110 110" style="transform:rotate(-90deg)"><circle cx="55" cy="55" r="49" fill="none" stroke="var(--line)" stroke-width="11"/><circle cx="55" cy="55" r="49" fill="none" stroke="var(--brand)" stroke-width="11" stroke-linecap="round" stroke-dasharray="308" stroke-dashoffset="43"/></svg>
+        <div class="txt"><span class="big">86%</span><span class="cap">do dia</span></div>
+      </div>
+      <div class="ring">
+        <svg width="110" height="110" viewBox="0 0 110 110" style="transform:rotate(-90deg)"><circle cx="55" cy="55" r="49" fill="none" stroke="var(--line)" stroke-width="8"/><circle cx="55" cy="55" r="49" fill="none" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" stroke-dasharray="308" stroke-dashoffset="0"/></svg>
+        <div class="txt"><span class="big" style="font-size:20px">3200</span><span class="cap">de 3000</span></div>
+      </div>
+    </div>
+    <div class="streak">
+      <span class="fire"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3 4 4.5 4 8a4 4 0 0 1-8 0c0-1 .3-1.8.7-2.5C7 8.5 6 10 6 12a6 6 0 0 0 12 0c0-4-3-7-6-10z"/></svg></span>
+      <span class="sk"><span class="n">20 dias</span><br><span class="l">Sequência</span></span>
+    </div>
+  </div>
+  <div class="panel dark">
+    <h2 class="title">Progresso & Sequência</h2>
+    <div class="rings">
+      <div class="ring">
+        <svg width="110" height="110" viewBox="0 0 110 110" style="transform:rotate(-90deg)"><circle cx="55" cy="55" r="49" fill="none" stroke="var(--line)" stroke-width="11"/><circle cx="55" cy="55" r="49" fill="none" stroke="var(--brand)" stroke-width="11" stroke-linecap="round" stroke-dasharray="308" stroke-dashoffset="43"/></svg>
+        <div class="txt"><span class="big">86%</span><span class="cap">do dia</span></div>
+      </div>
+      <div class="ring">
+        <svg width="110" height="110" viewBox="0 0 110 110" style="transform:rotate(-90deg)"><circle cx="55" cy="55" r="49" fill="none" stroke="var(--line)" stroke-width="8"/><circle cx="55" cy="55" r="49" fill="none" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" stroke-dasharray="308" stroke-dashoffset="0"/></svg>
+        <div class="txt"><span class="big" style="font-size:20px">3200</span><span class="cap">de 3000</span></div>
+      </div>
+    </div>
+    <div class="streak">
+      <span class="fire"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3 4 4.5 4 8a4 4 0 0 1-8 0c0-1 .3-1.8.7-2.5C7 8.5 6 10 6 12a6 6 0 0 0 12 0c0-4-3-7-6-10z"/></svg></span>
+      <span class="sk"><span class="n">20 dias</span><br><span class="l">Sequência</span></span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

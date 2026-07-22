@@ -1,0 +1,47 @@
+<!-- @dsCard group="Fundações" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{--surface:#fff;--content:#0f172a;--muted:#64748b;--faint:#94a3b8;--base:#f8fafc;}
+  .dark{--surface:#0f172a;--content:#f1f5f9;--muted:#94a3b8;--faint:#64748b;--base:#020617;}
+  *{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
+  body{margin:0;}
+  .stage{display:grid;grid-template-columns:1fr 1fr;}
+  .panel{padding:32px;background:var(--base);color:var(--content);}
+  .row{display:flex;align-items:baseline;gap:14px;padding:10px 0;border-bottom:1px solid rgba(148,163,184,.15);}
+  .tag{font-size:11px;color:var(--faint);font-family:ui-monospace,monospace;width:96px;flex:none;}
+  .display{font-size:34px;font-weight:800;letter-spacing:-.02em;}
+  .h1{font-size:20px;font-weight:700;}
+  .h2{font-size:16px;font-weight:600;}
+  .body{font-size:14px;font-weight:400;color:var(--content);}
+  .small{font-size:13px;color:var(--muted);}
+  .label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);}
+  h2.title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin:0 0 12px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="panel">
+    <h2 class="title">Tipografia · Inter</h2>
+    <div class="row"><span class="tag">800 · 34</span><span class="display">92%</span></div>
+    <div class="row"><span class="tag">700 · 20</span><span class="h1">HabitFlow</span></div>
+    <div class="row"><span class="tag">600 · 16</span><span class="h2">Hidratação</span></div>
+    <div class="row"><span class="tag">400 · 14</span><span class="body">Bom ritmo, continue assim.</span></div>
+    <div class="row"><span class="tag">400 · 13</span><span class="small">Faltam 1500ml</span></div>
+    <div class="row"><span class="tag">700 · 11</span><span class="label">Do dia</span></div>
+  </div>
+  <div class="panel dark">
+    <h2 class="title">Tipografia · Inter</h2>
+    <div class="row"><span class="tag">800 · 34</span><span class="display">92%</span></div>
+    <div class="row"><span class="tag">700 · 20</span><span class="h1">HabitFlow</span></div>
+    <div class="row"><span class="tag">600 · 16</span><span class="h2">Hidratação</span></div>
+    <div class="row"><span class="tag">400 · 14</span><span class="body">Bom ritmo, continue assim.</span></div>
+    <div class="row"><span class="tag">400 · 13</span><span class="small">Faltam 1500ml</span></div>
+    <div class="row"><span class="tag">700 · 11</span><span class="label">Do dia</span></div>
+  </div>
+</div>
+</body>
+</html>

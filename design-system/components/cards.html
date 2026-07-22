@@ -1,0 +1,59 @@
+<!-- @dsCard group="Componentes" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{--surface:#fff;--content:#0f172a;--muted:#64748b;--faint:#94a3b8;--base:#f8fafc;--line:#e2e8f0;}
+  .dark{--surface:#0f172a;--content:#f1f5f9;--muted:#94a3b8;--faint:#64748b;--base:#020617;--line:#1e293b;}
+  *{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
+  body{margin:0;}
+  .stage{display:grid;grid-template-columns:1fr 1fr;}
+  .panel{padding:28px;background:var(--base);color:var(--content);}
+  h2.title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin:0 0 16px;font-weight:700;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:16px;}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .chip{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+  .chip.indigo{background:rgba(99,102,241,.12);color:#6366f1;}
+  .chip.blue{background:rgba(59,130,246,.12);color:#3b82f6;}
+  .ttl{font-weight:600;font-size:15px;}
+  .stat .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);}
+  .stat .val{font-size:26px;font-weight:800;margin-top:4px;}
+  .stat .val span{font-size:13px;font-weight:400;color:var(--faint);}
+  svg{display:block;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="panel">
+    <h2 class="title">Cards</h2>
+    <div class="card">
+      <div class="head">
+        <span class="chip blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5S5 13 5 15a7 7 0 0 0 7 7z"/></svg></span>
+        <span class="ttl">Hidratação</span>
+      </div>
+      <div class="stat"><div class="val">3200 <span>de 3000ml</span></div></div>
+    </div>
+    <div class="card stat" style="border-radius:16px;padding:18px">
+      <div class="head" style="color:#6366f1"><span class="lbl">Peso Médio</span></div>
+      <div class="val">80.6 <span>kg</span></div>
+    </div>
+  </div>
+  <div class="panel dark">
+    <h2 class="title">Cards</h2>
+    <div class="card">
+      <div class="head">
+        <span class="chip blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5S5 13 5 15a7 7 0 0 0 7 7z"/></svg></span>
+        <span class="ttl">Hidratação</span>
+      </div>
+      <div class="stat"><div class="val">3200 <span>de 3000ml</span></div></div>
+    </div>
+    <div class="card stat" style="border-radius:16px;padding:18px">
+      <div class="head" style="color:#818cf8"><span class="lbl">Peso Médio</span></div>
+      <div class="val">80.6 <span>kg</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
