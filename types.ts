@@ -18,6 +18,7 @@ export interface DailyLog {
   didGym: boolean;
   gymCalories: number;
   meals: MealLog;
+  medsTaken: string[]; // ids dos medicamentos tomados no dia
   notes?: string;
 }
 

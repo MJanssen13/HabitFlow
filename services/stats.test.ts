@@ -18,6 +18,7 @@ const makeLog = (date: string, over: Partial<DailyLog> = {}): DailyLog => ({
     dinner: 'skipped',
     supper: 'skipped',
   },
+  medsTaken: [],
   ...over,
 });
 

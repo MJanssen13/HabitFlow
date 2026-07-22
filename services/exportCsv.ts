@@ -10,6 +10,7 @@ const CSV_HEADERS = [
   'calorias_academia',
   'refeicoes_saudaveis',
   'refeicoes_inadequadas',
+  'medicamentos_tomados',
   'notas',
 ];
 
@@ -35,6 +36,7 @@ export const logsToCsv = (logs: DailyLog[]): string => {
       log.gymCalories || 0,
       healthy,
       off,
+      (log.medsTaken ?? []).length,
       log.notes ?? '',
     ]
       .map(escapeCell)

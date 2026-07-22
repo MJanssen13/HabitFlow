@@ -24,6 +24,7 @@ export const getEmptyLog = (date: string): DailyLog => ({
     dinner: 'skipped',
     supper: 'skipped',
   },
+  medsTaken: [],
 });
 
 // Helper para migrar dados antigos (boolean) para o novo formato (MealStatus)
@@ -77,6 +78,7 @@ export const fetchDailyLog = async (date: string): Promise<DailyLog> => {
           didGym: data.did_gym,
           gymCalories: data.gym_calories,
           meals: data.meals ? migrateMeals(data.meals) : getEmptyLog(date).meals,
+          medsTaken: Array.isArray(data.meds_taken) ? data.meds_taken : [],
           notes: data.notes
         };
       }
@@ -93,10 +95,11 @@ export const fetchDailyLog = async (date: string): Promise<DailyLog> => {
     // Garante migração também no LocalStorage
     return {
         ...allLogs[date],
-        meals: migrateMeals(allLogs[date].meals)
+        meals: migrateMeals(allLogs[date].meals),
+        medsTaken: Array.isArray(allLogs[date].medsTaken) ? allLogs[date].medsTaken : []
     };
   }
-  
+
   return getEmptyLog(date);
 };
 
@@ -119,6 +122,7 @@ export const saveDailyLog = async (log: DailyLog): Promise<void> => {
         did_gym: log.didGym,
         gym_calories: log.gymCalories,
         meals: log.meals,
+        meds_taken: log.medsTaken,
         notes: log.notes
       };
 
@@ -183,6 +187,7 @@ export const fetchAllHistory = async (): Promise<DailyLog[]> => {
                     didGym: d.did_gym,
                     gymCalories: d.gym_calories,
                     meals: d.meals ? migrateMeals(d.meals) : migrateMeals({}),
+                    medsTaken: Array.isArray(d.meds_taken) ? d.meds_taken : [],
                     notes: d.notes
                 }));
             }
@@ -197,7 +202,8 @@ export const fetchAllHistory = async (): Promise<DailyLog[]> => {
         const allLogs: Record<string, any> = stored ? JSON.parse(stored) : {};
         logs = Object.values(allLogs).map(l => ({
             ...l,
-            meals: migrateMeals(l.meals)
+            meals: migrateMeals(l.meals),
+            medsTaken: Array.isArray(l.medsTaken) ? l.medsTaken : []
         }));
     }
 

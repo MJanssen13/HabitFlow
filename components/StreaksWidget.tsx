@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Flame, Droplets, Utensils, Dumbbell } from 'lucide-react';
+import { Flame, Droplets, Utensils, Dumbbell, Pill } from 'lucide-react';
 import { fetchAllHistory, getTodayString } from '../services/dataService';
 import { getWaterGoal } from '../services/settings';
 import { computeCurrentStreak, streakPredicates } from '../services/stats';
+import { Medication, allMedsTaken } from '../services/medications';
 import { DailyLog } from '../types';
 
 interface Props {
   refreshTrigger: number;
+  medications?: Medication[];
 }
 
 interface StreakItem {
@@ -17,7 +19,7 @@ interface StreakItem {
   tint: string;
 }
 
-const StreaksWidget: React.FC<Props> = ({ refreshTrigger }) => {
+const StreaksWidget: React.FC<Props> = ({ refreshTrigger, medications = [] }) => {
   const [logs, setLogs] = useState<DailyLog[]>([]);
 
   useEffect(() => {
@@ -27,11 +29,23 @@ const StreaksWidget: React.FC<Props> = ({ refreshTrigger }) => {
   const today = getTodayString();
   const goal = getWaterGoal();
 
+  const hasMeds = medications.some((m) => m.enabled);
+
   const items: StreakItem[] = [
     { key: 'diet', label: 'Dieta', days: computeCurrentStreak(logs, today, streakPredicates.diet()), icon: <Utensils size={16} />, tint: 'text-emerald-500' },
     { key: 'water', label: 'Água', days: computeCurrentStreak(logs, today, streakPredicates.water(goal)), icon: <Droplets size={16} />, tint: 'text-blue-500' },
     { key: 'exercise', label: 'Exercício', days: computeCurrentStreak(logs, today, streakPredicates.exercise()), icon: <Dumbbell size={16} />, tint: 'text-purple-500' },
   ];
+
+  if (hasMeds) {
+    items.push({
+      key: 'meds',
+      label: 'Remédios',
+      days: computeCurrentStreak(logs, today, (log) => allMedsTaken(medications, log.medsTaken ?? [])),
+      icon: <Pill size={16} />,
+      tint: 'text-rose-500',
+    });
+  }
 
   const best = Math.max(...items.map((i) => i.days), 0);
 

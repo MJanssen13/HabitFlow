@@ -18,6 +18,7 @@ const base: DailyLog = {
     dinner: 'skipped',
     supper: 'skipped',
   },
+  medsTaken: [],
   notes: 'dia bom',
 };
 
@@ -30,8 +31,8 @@ describe('logsToCsv', () => {
   it('serializa uma linha com contagens de refeição corretas', () => {
     const csv = logsToCsv([base]);
     const row = csv.split('\n')[1];
-    // 2 saudáveis, 1 inadequada
-    expect(row).toBe('2026-07-22,82.5,3000,sim,300,nao,0,2,1,dia bom');
+    // 2 saudáveis, 1 inadequada, 0 medicamentos
+    expect(row).toBe('2026-07-22,82.5,3000,sim,300,nao,0,2,1,0,dia bom');
   });
 
   it('escapa campos com vírgula/aspas', () => {
@@ -43,6 +44,6 @@ describe('logsToCsv', () => {
   it('deixa peso vazio quando null', () => {
     const csv = logsToCsv([{ ...base, weight: null }]);
     const row = csv.split('\n')[1];
-    expect(row).toBe('2026-07-22,,3000,sim,300,nao,0,2,1,dia bom');
+    expect(row).toBe('2026-07-22,,3000,sim,300,nao,0,2,1,0,dia bom');
   });
 });

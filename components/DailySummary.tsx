@@ -1,11 +1,13 @@
 import React from 'react';
-import { Droplets, Utensils, Flame, Scale } from 'lucide-react';
+import { Droplets, Utensils, Flame, Scale, Pill } from 'lucide-react';
 import { DailyLog } from '../types';
 import { getWaterGoal } from '../services/settings';
+import { Medication, medsProgress } from '../services/medications';
 import ProgressRing from './ProgressRing';
 
 interface Props {
   data: DailyLog;
+  medications?: Medication[];
 }
 
 interface Metric {
@@ -20,7 +22,7 @@ interface Metric {
  * Cabeçalho da aba Diário: mostra o progresso geral do dia num anel grande
  * e o detalhamento por área (água, dieta, exercício, peso).
  */
-const DailySummary: React.FC<Props> = ({ data }) => {
+const DailySummary: React.FC<Props> = ({ data, medications = [] }) => {
   const goal = getWaterGoal();
 
   const waterPct = Math.min(100, (data.waterMl / goal) * 100);
@@ -32,14 +34,20 @@ const DailySummary: React.FC<Props> = ({ data }) => {
   const exercisePct = data.didRun || data.didGym ? 100 : 0;
   const weightPct = data.weight ? 100 : 0;
 
-  const overall = Math.round((waterPct + dietPct + exercisePct + weightPct) / 4);
-
   const metrics: Metric[] = [
     { key: 'water', label: 'Água', pct: Math.round(waterPct), icon: <Droplets size={16} />, tint: 'text-blue-500' },
     { key: 'diet', label: 'Dieta', pct: Math.round(dietPct), icon: <Utensils size={16} />, tint: 'text-emerald-500' },
     { key: 'exercise', label: 'Exercício', pct: exercisePct, icon: <Flame size={16} />, tint: 'text-orange-500' },
     { key: 'weight', label: 'Peso', pct: weightPct, icon: <Scale size={16} />, tint: 'text-indigo-500' },
   ];
+
+  // Medicamentos entram no resumo apenas quando há algum cadastrado/habilitado.
+  const medsPct = medsProgress(medications, data.medsTaken ?? []);
+  if (medsPct !== null) {
+    metrics.push({ key: 'meds', label: 'Remédios', pct: Math.round(medsPct * 100), icon: <Pill size={16} />, tint: 'text-rose-500' });
+  }
+
+  const overall = Math.round(metrics.reduce((acc, m) => acc + m.pct, 0) / metrics.length);
 
   const message =
     overall >= 100
@@ -61,9 +69,9 @@ const DailySummary: React.FC<Props> = ({ data }) => {
 
       <div className="flex-1 w-full">
         <p className="text-sm text-muted mb-4">{message}</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="flex flex-wrap gap-3">
           {metrics.map((m) => (
-            <div key={m.key} className="bg-elevated rounded-xl border border-line p-3 flex flex-col gap-1.5">
+            <div key={m.key} className="flex-1 min-w-[120px] bg-elevated rounded-xl border border-line p-3 flex flex-col gap-1.5">
               <div className={`flex items-center gap-1.5 ${m.tint}`}>
                 {m.icon}
                 <span className="text-xs font-semibold text-muted">{m.label}</span>

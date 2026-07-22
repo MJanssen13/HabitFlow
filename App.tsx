@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { ChevronLeft, ChevronRight, LayoutDashboard, BarChart3, History as HistoryIcon, Trash2, Check, Loader2, Cloud, Moon, Sun } from 'lucide-react';
 import { getTodayString, fetchDailyLog, saveDailyLog, clearDailyLog, getEmptyLog } from './services/dataService';
 import { useTheme } from './hooks/useTheme';
+import { useMedicationReminders } from './hooks/useMedicationReminders';
+import { getMedications, saveMedications, Medication } from './services/medications';
+import { registerServiceWorker } from './services/notifications';
 import { DailyLog } from './types';
 
 // Components (aba Diário — carregados imediatamente)
@@ -9,6 +12,7 @@ import WaterTracker from './components/WaterTracker';
 import DietTracker from './components/DietTracker';
 import ExerciseTracker from './components/ExerciseTracker';
 import WeightWidget from './components/WeightWidget';
+import MedicationTracker from './components/MedicationTracker';
 import DailySummary from './components/DailySummary';
 import StreaksWidget from './components/StreaksWidget';
 import NotesWidget from './components/NotesWidget';
@@ -37,12 +41,26 @@ const App: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const [activeTab, setActiveTab] = useState<Tab>('tracker');
   const [refreshDataTrigger, setRefreshDataTrigger] = useState(0);
+  const [medications, setMedications] = useState<Medication[]>(() => getMedications());
   const { theme, toggleTheme } = useTheme();
 
   // Ref para controlar o timeout do autosave
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isToday = date === getTodayString();
+
+  // Registra o service worker uma vez (necessário para notificações no mobile).
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
+  // Agenda lembretes dos medicamentos de hoje ainda não tomados.
+  useMedicationReminders(medications, log?.medsTaken ?? [], date);
+
+  const updateMedications = (next: Medication[]) => {
+    setMedications(next);
+    saveMedications(next);
+  };
 
   // Load data when date changes
   useEffect(() => {
@@ -209,14 +227,20 @@ const App: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <DailySummary data={log} />
+              <DailySummary data={log} medications={medications} />
 
-              <StreaksWidget refreshTrigger={refreshDataTrigger} />
+              <StreaksWidget refreshTrigger={refreshDataTrigger} medications={medications} />
 
               {/* Tracker Grid Layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="flex flex-col gap-6 md:col-span-1">
                   <WeightWidget data={log} onChange={updateLog} />
+                  <MedicationTracker
+                    medications={medications}
+                    onMedicationsChange={updateMedications}
+                    data={log}
+                    onChange={updateLog}
+                  />
                 </div>
 
                 <div className="md:col-span-1">
