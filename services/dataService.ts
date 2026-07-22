@@ -44,14 +44,25 @@ const migrateMeals = (meals: any): MealLog => {
 // Detecta automaticamente se o Supabase está configurado
 const isSupabaseConfigured = !!supabase;
 
+// Evita que a UI trave indefinidamente se a rede/Supabase não responder.
+const SUPABASE_TIMEOUT_MS = 6000;
+
+const withTimeout = <T>(promise: PromiseLike<T>, ms = SUPABASE_TIMEOUT_MS): Promise<T> =>
+  Promise.race([
+    Promise.resolve(promise),
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Supabase timeout')), ms)),
+  ]);
+
 export const fetchDailyLog = async (date: string): Promise<DailyLog> => {
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase
-        .from('daily_logs')
-        .select('*')
-        .eq('date', date)
-        .maybeSingle(); // maybeSingle evita erro se não existir registro
+      const { data, error } = await withTimeout(
+        supabase
+          .from('daily_logs')
+          .select('*')
+          .eq('date', date)
+          .maybeSingle(), // maybeSingle evita erro se não existir registro
+      );
 
       if (error) throw error;
       
@@ -155,11 +166,13 @@ export const fetchAllHistory = async (): Promise<DailyLog[]> => {
     // Tenta buscar do Supabase
     if (isSupabaseConfigured && supabase) {
         try {
-            const { data, error } = await supabase
-                .from('daily_logs')
-                .select('*')
-                .order('date', { ascending: true });
-            
+            const { data, error } = await withTimeout(
+                supabase
+                    .from('daily_logs')
+                    .select('*')
+                    .order('date', { ascending: true }),
+            );
+
             if (!error && data) {
                 logs = data.map(d => ({
                     date: d.date,

@@ -1,63 +1,101 @@
-import React from 'react';
-import { Scale } from 'lucide-react';
+import React, { useState } from 'react';
+import { Scale, Settings, Check } from 'lucide-react';
 import { DailyLog } from '../types';
+import { getHeight, setHeight as persistHeight, classifyBMI } from '../services/settings';
 
 interface Props {
   data: DailyLog;
   onChange: (updates: Partial<DailyLog>) => void;
 }
 
+const toneClasses: Record<string, string> = {
+  blue: 'text-blue-500',
+  emerald: 'text-emerald-500',
+  amber: 'text-amber-500',
+  red: 'text-red-500',
+};
+
 const WeightWidget: React.FC<Props> = ({ data, onChange }) => {
-  const HEIGHT = 1.79;
-  
-  const calculateIMC = () => {
-    if (!data.weight) return null;
-    const imc = data.weight / (HEIGHT * HEIGHT);
-    // Exibe com 2 casas decimais conforme solicitado
-    return imc.toFixed(2);
-  };
+  const [height, setHeightState] = useState<number>(() => getHeight());
+  const [isEditingHeight, setIsEditingHeight] = useState(false);
+  const [tempHeight, setTempHeight] = useState<string>(String(height));
 
-  const imc = calculateIMC();
+  const bmi = data.weight ? data.weight / (height * height) : null;
+  const bmiInfo = bmi ? classifyBMI(bmi) : null;
 
-  // Helper para cor do texto baseado no IMC
-  const getImcColor = (val: string | null) => {
-    if (!val) return 'text-slate-400';
-    const num = parseFloat(val);
-    if (num < 18.5) return 'text-blue-500'; // Abaixo
-    if (num < 25) return 'text-emerald-500'; // Normal
-    if (num < 30) return 'text-orange-500'; // Sobrepeso
-    return 'text-red-500'; // Obesidade
+  const saveHeight = () => {
+    const value = parseFloat(tempHeight);
+    if (value && value > 0.5 && value < 2.6) {
+      persistHeight(value);
+      setHeightState(value);
+      setIsEditingHeight(false);
+    }
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-full">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-          <Scale size={20} />
+    <div className="bg-surface p-6 rounded-2xl shadow-card border border-line flex flex-col justify-between h-full">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
+            <Scale size={20} />
+          </div>
+          <h3 className="font-semibold text-content">Peso Atual</h3>
         </div>
-        <h3 className="font-semibold text-slate-800">Peso Atual</h3>
+        <button
+          onClick={() => {
+            setTempHeight(String(height));
+            setIsEditingHeight((v) => !v);
+          }}
+          className="text-faint hover:text-muted transition-colors p-1 hover:bg-elevated rounded-md"
+          title="Definir altura"
+        >
+          <Settings size={18} />
+        </button>
       </div>
-      
-      <div className="flex items-center justify-between mt-2">
-        <div className="flex items-end gap-2">
-            <input 
-                type="number" 
-                step="0.1"
-                value={data.weight || ''}
-                onChange={(e) => onChange({ weight: parseFloat(e.target.value) || null })}
-                placeholder="--"
-                className="text-4xl font-bold text-slate-800 w-24 bg-transparent border-b-2 border-slate-200 focus:border-indigo-500 focus:outline-none transition-colors"
-            />
-            <span className="text-slate-500 font-medium mb-2">kg</span>
-        </div>
 
-        {imc && (
+      {isEditingHeight ? (
+        <div className="my-2 bg-elevated p-4 rounded-xl border border-line animate-in fade-in slide-in-from-top-2">
+          <label className="block text-xs font-semibold text-muted uppercase mb-2">Altura (metros)</label>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              step="0.01"
+              value={tempHeight}
+              onChange={(e) => setTempHeight(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && saveHeight()}
+              className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-content focus:outline-none focus:ring-2 focus:ring-brand/40"
+              placeholder="Ex: 1.79"
+            />
+            <button
+              onClick={saveHeight}
+              className="bg-brand text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-1"
+            >
+              <Check size={16} /> OK
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-end justify-between mt-2">
+          <div className="flex items-end gap-2">
+            <input
+              type="number"
+              step="0.1"
+              value={data.weight ?? ''}
+              onChange={(e) => onChange({ weight: parseFloat(e.target.value) || null })}
+              placeholder="--"
+              className="text-4xl font-bold text-content w-24 bg-transparent border-b-2 border-line focus:border-brand focus:outline-none transition-colors"
+            />
+            <span className="text-muted font-medium mb-2">kg</span>
+          </div>
+
+          {bmi && bmiInfo && (
             <div className="flex flex-col items-end animate-in fade-in slide-in-from-right-2">
-                <span className={`text-2xl font-bold ${getImcColor(imc)}`}>{imc}</span>
-                <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">IMC (1.79m)</span>
+              <span className={`text-2xl font-bold ${toneClasses[bmiInfo.tone]}`}>{bmi.toFixed(1)}</span>
+              <span className="text-[11px] text-faint font-medium">IMC · {bmiInfo.label}</span>
             </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
