@@ -1,17 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { ChevronLeft, ChevronRight, LayoutDashboard, BarChart3, History as HistoryIcon, Trash2, Check, Loader2, Cloud, Moon, Sun } from 'lucide-react';
 import { getTodayString, fetchDailyLog, saveDailyLog, clearDailyLog, getEmptyLog } from './services/dataService';
 import { useTheme } from './hooks/useTheme';
 import { DailyLog } from './types';
 
-// Components
+// Components (aba Diário — carregados imediatamente)
 import WaterTracker from './components/WaterTracker';
 import DietTracker from './components/DietTracker';
 import ExerciseTracker from './components/ExerciseTracker';
 import WeightWidget from './components/WeightWidget';
 import DailySummary from './components/DailySummary';
-import AnalyticsDashboard from './components/AnalyticsDashboard';
-import HistoryView from './components/HistoryView';
+import StreaksWidget from './components/StreaksWidget';
+import NotesWidget from './components/NotesWidget';
+
+// Abas pesadas (Recharts/tabelas) — carregadas sob demanda para reduzir o bundle inicial
+const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
+const HistoryView = lazy(() => import('./components/HistoryView'));
+
+const TabFallback = () => (
+  <div className="flex items-center justify-center h-64 text-faint">
+    <Loader2 size={24} className="animate-spin mr-2" /> Carregando...
+  </div>
+);
 
 type Tab = 'tracker' | 'analytics' | 'history';
 
@@ -201,6 +211,8 @@ const App: React.FC = () => {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <DailySummary data={log} />
 
+              <StreaksWidget refreshTrigger={refreshDataTrigger} />
+
               {/* Tracker Grid Layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="flex flex-col gap-6 md:col-span-1">
@@ -223,13 +235,23 @@ const App: React.FC = () => {
                   <ExerciseTracker data={log} onChange={updateLog} />
                 </div>
               </div>
+
+              <NotesWidget data={log} onChange={updateLog} />
             </div>
           )
         )}
 
-        {activeTab === 'analytics' && <AnalyticsDashboard refreshTrigger={refreshDataTrigger} />}
+        {activeTab === 'analytics' && (
+          <Suspense fallback={<TabFallback />}>
+            <AnalyticsDashboard refreshTrigger={refreshDataTrigger} />
+          </Suspense>
+        )}
 
-        {activeTab === 'history' && <HistoryView refreshTrigger={refreshDataTrigger} />}
+        {activeTab === 'history' && (
+          <Suspense fallback={<TabFallback />}>
+            <HistoryView refreshTrigger={refreshDataTrigger} />
+          </Suspense>
+        )}
       </main>
 
       {/* Mobile Tab Navigation (Fixed Bottom) */}
